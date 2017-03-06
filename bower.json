@@ -1,0 +1,34 @@
+{
+  "name": "tsbb",
+  "description": "Bulletin & Board for Crossover.",
+  "main": "server.js",
+  "authors": [
+    "Tanveer Sidiq"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Bulletin",
+    "Board",
+    "BB"
+  ],
+  "homepage": "https://github.com/tanveersidiq/tsbb",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/libs",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.7.0",
+    "sb-admin-2": "*",
+    "angular": "^1.6.2",
+    "angular-route": "^1.6.2",
+    "angular-loading-bar": "^0.9.0",
+    "toastr": "^2.1.3",
+    "angular-toastr": "^2.1.1"
+  }
+}

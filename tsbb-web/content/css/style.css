@@ -1,0 +1,10 @@
+ input.ng-touched.ng-invalid {
+    border: 1px solid red!important;
+    box-shadow: 0 0 6px red!important;
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    position: relative;
+    padding: 5px
+}

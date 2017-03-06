@@ -1,0 +1,34 @@
+{
+  "name": "tsbb",
+  "version": "1.0.1",
+  "description": "Bulletin & Board for Crossover.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tanveersidiq/tsbb.git"
+  },
+  "keywords": [
+    "Bulletin",
+    "Board",
+    "BB"
+  ],
+  "author": "Tanveer Sidiq",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tanveersidiq/tsbb/issues"
+  },
+  "homepage": "https://github.com/tanveersidiq/tsbb#readme",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.17.0",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.1",
+    "mongoose": "^4.8.6"
+  },
+  "devDependencies": {
+    "bower": "^1.8.0"
+  }
+}

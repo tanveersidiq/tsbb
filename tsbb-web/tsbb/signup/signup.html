@@ -1,0 +1,28 @@
+<div data-ng-controller="signupController">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Register a new user</h4>
+            </div>
+            <div class="modal-body">
+                <form name="frmSignup">
+                    <div class="form-group">
+                        <label for="email">Your Email *</label>
+                        <input type="email" id="txtEmail" name="txtEmail" data-ng-model="user.email" maxlength="50" class="form-control"
+                            placeholder="Enter your email" tabindex="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Enter Your Password *</label>
+                        <input type="password" id="txtPassword" name="txtPassword" data-ng-model="user.password" maxlength="50" class="form-control "
+                            placeholder="Enter your password" tabindex="2" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="form-group">
+                    <button data-ng-disabled="frmSignup.$invalid" type="button" class="btn btn-primary" data-ng-click="signup()" tabindex="4">Sign up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
