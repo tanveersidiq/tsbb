@@ -1,19 +1,29 @@
 'use strict';
-app.factory('accountService', [
-    '$http',
-    '$q',
-    '$location',
-    'tsBBSettings',
-    function ($http, $q, $location, tsBBSettings) {
+app.factory('accountService',
+    function ($http, $q, $location, localStorageService, tsBBSettings) {
 
         var serviceBase = tsBBSettings.apiBaseUri;
         var accountServiceFactory = {};
-      
+
         var _authentication = {
             token: '',
-            authenticated: false,
-            userName: '',
-            roles: ['administrator']
+            email: '',
+            authenticated: false
+        };
+
+        var _users = function () {
+            var deferred = $q.defer();
+
+            $http
+                .get(serviceBase + 'account/users')
+                .then(function (response) {
+                    deferred.resolve(response);
+                })
+                .catch(function (err) {
+                    deferred.reject(err);
+                });
+
+            return deferred.promise;
         };
 
         var _login = function (user) {
@@ -28,10 +38,10 @@ app.factory('accountService', [
                 .post(serviceBase + 'account/login', userData)
                 .then(function (response) {
                     _authentication.token = response.data.token;
+                    _authentication.email = response.data.Email;
                     _authentication.authenticated = true;
-                    _authentication.email = userData.email;
 
-                    //localStorageService.set('authorizationData', _authentication);
+                    localStorageService.set('userData', _authentication);
 
                     deferred.resolve(response);
                 })
@@ -53,11 +63,11 @@ app.factory('accountService', [
             $http
                 .post(serviceBase + 'account/register', userData)
                 .then(function (response) {
+
                     _authentication.token = response.data.token;
                     _authentication.authenticated = true;
-                    _authentication.userName = loginData.email;
 
-                    //localStorageService.set('authorizationData', _authentication);
+                    localStorageService.set('userData', _authentication);
 
                     deferred.resolve(response);
                 })
@@ -70,23 +80,21 @@ app.factory('accountService', [
 
         var _logOut = function () {
 
-            //localStorageService.remove('authorizationData');
+            localStorageService.remove('userData');
 
             _authentication.authenticated = false;
-            _authentication.userName = "";
             _authentication.token = "";
             $location.path('/');
         };
 
-        // var _fillAuthData = function () {
+        var _userData = function () {
 
-        //     var authData = localStorageService.get('authorizationData');
-        //     if (authData) {
-        //         _authentication.authenticated = true;
-        //         _authentication.userName = authData.userName;
-        //     }
+            var userData = localStorageService.get('userData');
+            if (userData) {
+                _authentication.authenticated = userData.authenticated;
+            }
 
-        // };
+        };
 
         var _authorize = function (accountService) {
             if (accountService && accountService.authentication.authenticated === true)
@@ -94,38 +102,17 @@ app.factory('accountService', [
             throw new AuthorizationError("User not authenticated.");
         };
 
-        // var _isAdmin = function () {
-
-        //     if (_authentication.roles && _authentication.roles.length < 1) {
-        //         var auth = localStorageService.get('authorizationData');
-        //         _authentication.authenticated = auth.authenticated;
-        //         _authentication.userName = auth.userName;
-        //         _authentication.token = auth.token;
-        //         _authentication.roles = auth.roles;
-        //     }
-
-        //     var adminRole = $.grep(_authentication.roles, function (role) {
-        //         return role.toLowerCase() === 'administrator';
-        //     });
-
-        //     if (adminRole && adminRole.length > 0) {
-        //         return true;
-        //     } else {
-        //         return false;
-        //     }
-        // };
-
+        accountServiceFactory.users = _users;
         accountServiceFactory.login = _login;
         accountServiceFactory.register = _register;
         accountServiceFactory.logOut = _logOut;
-        // authServiceFactory.fillAuthData = _fillAuthData;
+        accountServiceFactory.userData = _userData;
         accountServiceFactory.authentication = _authentication;
         accountServiceFactory.authorize = _authorize;
-        // authServiceFactory.isAdmin = _isAdmin;
 
         return accountServiceFactory;
     }
-]);
+);
 
 // Custom error type
 function AuthorizationError(description) {

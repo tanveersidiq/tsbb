@@ -1,25 +1,25 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
-    var User = sequelize
-        .define('Users', {
+    var Bulletin = sequelize
+        .define('Bulletins', {
             Id: {
                 field: 'Id',
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
                 primaryKey: true
             },
-            Email: {
-                field: 'Email',
+            Title: {
+                field: 'Title',
                 allowNull: false,
                 type: DataTypes.STRING
             },
-            Password: {
-                field: 'Password',
+            User: {
+                field: 'User',
                 allowNull: false,
-                type: DataTypes.STRING
+                type: DataTypes.INTEGER
             }
         }, {
             timestamps: false
         });
-    return User;
+    return Bulletin;
 };

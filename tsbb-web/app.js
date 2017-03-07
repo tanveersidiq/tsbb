@@ -1,15 +1,18 @@
 var app = angular.module('tsBB', [
     'ngRoute',
+    'LocalStorageModule',
     'toastr',
     'angular-loading-bar',
+    'ui.bootstrap',
+    'drag',
     'tsBBRoutes'
 ]);
 
 app.constant('tsBBSettings', (function () {
     var hostURL = window.location.protocol + '//' + window.location.host;
     return {
-        webUIBaseUri: hostURL + '/web/',
-        apiBaseUri: hostURL + '/api/'
+        webUIBaseUri: hostURL,
+        apiBaseUri: hostURL + '/tsbb-api/'
     }
 })());
 
@@ -21,7 +24,7 @@ app.config([
     'cfpLoadingBarProvider',
     'tsBBSettings',
     function ($qProvider, $httpProvider, $routeProvider, toastrConfig, cfpLoadingBarProvider, tsBBSettings) {
-
+        $qProvider.errorOnUnhandledRejections(false);
         cfpLoadingBarProvider.parentSelector = '#loading-bar-container';
         $qProvider.errorOnUnhandledRejections(false);
 
@@ -45,17 +48,13 @@ app.config([
 
 app.run(['$rootScope', '$location', 'accountService', 'notificationService',
     function ($rootScope, $location, accountService, notificationService) {
-        //accountService.fillAuthData();
+        accountService.userData();
 
         $rootScope.$on("$routeChangeStart", function (evt, to, from) {
             if (to && to.authorize) {
                 if (from == undefined && to.$$route.originalPath !== '/') {
-                      $location.path("/company");
+                    $location.path("/home");
                 } else {
-                    if (to.roles && to.roles.length > 0 && !accountService.isReInvoicingAdmin()) {
-                        $location.path("/login");
-                        notificationService.displayError(new AuthorizationError().forbidden);
-                    }
                     to.resolve = to.resolve || {};
                     if (!to.resolve.authorizationResolver) {
                         to.resolve.authorizationResolver = function (accountService) {

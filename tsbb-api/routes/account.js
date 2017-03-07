@@ -1,77 +1,121 @@
-var routes = function (router, user) {
+var jwt = require("jsonwebtoken");
+
+var routes = function (router, models) {
 
     var accountRouter = router.Router();
 
     accountRouter
+        .get('/account/users', function (req, res) {
+            models.Users.findAll({
+                    order: 'Email ASC',
+                    include: [{
+                        model: models.Friends,
+                        as: 'Friends',
+                        required: false
+                    }]
+                })
+                .then(function (users) {
+                    res.status(200).json(users);
+                })
+                .catch(function (error) {
+                    res.status(500).json(error);
+                });
+        })
         .post('/account/register', function (req, res) {
+            models.Users
+                .count({
+                    where: {
+                        Email: req.body.email
+                    }
+                })
+                .then(function (userCount) {
+                    if (userCount > 0) {
+                        var error = {
+                            'message': "Email already registered."
+                        };
+                        res.status(409).json(error);
 
-            user
-                .findOne({
-                        'local.email': req.body.email
-                    },
-                    function (err, users) {
-                        if (users) {
-                            res
-                                .status(409)
-                                .json({
-                                    'message': "Email already registered."
-                                });
-                        } else {
+                    } else {
+                        models.Users.create({
+                                Email: req.body.email,
+                                Password: req.body.password
+                            })
+                            .then(function (user) {
 
-                            new user({
-                                    'local.email': req.body.email,
-                                    'local.password': req.body.password
-                                })
-                                .save(
-                                    function (err, user, count) {
-                                        res
-                                            .status(201)
-                                            .json({
-                                                'message': "User created.",
-                                                'data': user
-                                            });
-                                    });
-                        }
-                    });
+                                user.token = jwt.sign({
+                                    id: user.dataValues.Id,
+                                    email: user.dataValues.Email
+                                }, process.env.JWT_SECRET);
+
+                                res.status(200).json(user);
+                            })
+                            .catch(function (error) {
+                                res.status(406).json(error);
+                            });
+                    }
+                })
+                .catch(function (error) {
+                    res.status(400).json(error);
+                });
+
         })
         .post('/account/login', function (req, res) {
-            user
-                .findOne({
-                        'local.email': req.body.email,
-                        'local.password': req.body.password
-                    },
-                    function (err, users) {
-                        if (!users) {
-                            res
-                                .status(401)
-                                .json({
-                                    'message': "Authentication failed."
-                                });
-                        } else {
-                            res
-                                .status(200)
-                                .json({
-                                    'data': users
-                                });
-                        }
-                    });
-            // var token = req.body.token;
-            // jwt.verify(token, process.env.JWT_SECRET, {
-            //     ignoreExpiration: false
-            // }, function (err, decoded) {
-            //     if (err) {
-            //         return res.status(403).json({
-            //             success: false,
-            //             message: 'Invalid token.'
-            //         });
-            //     } else {
-            //         var userModel = {
-            //             token: token,
-            //             userName: decoded.userName
-            //         };
-            //         res.status(200).json(userModel);
-            //     }
-            // });
+            models.Users.findOne({
+                    where: {
+                        Email: req.body.email,
+                        Password: req.body.password,
+                    }
+                })
+                .then(function (user) {
+                    if (user === null) {
+                        var error = {
+                            'message': 'Authentication failed.'
+                        };
+                        res.status(401).json(error);
+
+                    } else {
+
+                        user.dataValues.token = jwt.sign({
+                            id: user.dataValues.Id,
+                            email: user.dataValues.Email
+                        }, process.env.JWT_SECRET);
+
+                        res.status(200).json(user);
+
+                    }
+                })
+                .catch(function (error) {
+                    res.status(400).json(error);
+                });
+        })
+        .post('/account/requestfriendship', function (req, res) {
+            models.Friends.findOne({
+                    where: {
+                        User: req.userId,
+                        Password: req.body.user,
+                    }
+                })
+                .then(function (user) {
+                    if (user === null) {
+                        var error = {
+                            'message': 'Authentication failed.'
+                        };
+                        res.status(401).json(error);
+
+                    } else {
+
+                        user.dataValues.token = jwt.sign({
+                            id: user.dataValues.Id,
+                            email: user.dataValues.Email
+                        }, process.env.JWT_SECRET);
+
+                        res.status(200).json(user);
+
+                    }
+                })
+                .catch(function (error) {
+                    res.status(400).json(error);
+                });
         });
 
     return accountRouter;

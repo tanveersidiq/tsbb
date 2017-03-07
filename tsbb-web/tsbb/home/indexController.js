@@ -1,11 +1,7 @@
 'use strict';
-app.controller('indexController', [
-    '$scope',
-    '$location',
-    '$window',
-    'accountService',
-    function ($scope, $location, $window, accountService) {
-
+app.controller('indexController',
+    function ($scope, $rootScope, $location, $window, accountService) {
+        $rootScope.joinedBulletins = [];
         $scope.logOut = function () {
             accountService.logOut();
         }
@@ -15,6 +11,5 @@ app.controller('indexController', [
         }
 
         $scope.authentication = accountService.authentication;
-        $scope.globalData = accountService.globalData;
     }
-]);
+);

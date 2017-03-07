@@ -5,6 +5,20 @@ app.factory('notificationService', [
 
         var notificationServiceFactory = {};
         var _getErrorMessage = function (error) {
+            if (error) {
+                if (error.message) {
+                    return error.message;
+                } else if (error.data && error.data.message) {
+                    return error.data.message;
+                } else if (error.data) {
+                    return error.data;
+                } else {
+                    return error;
+                }
+            } else {
+                return 'Undefined error';
+            }
+
             return error && error.message ? error.message : error
         }
         notificationServiceFactory.displaySuccess = function (message) {

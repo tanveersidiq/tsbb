@@ -1,27 +1,25 @@
 'use strict';
-app.factory('authInterceptorService', [
-    '$q',
-    '$injector',
-    function ($q, $injector) {
+app.factory('authInterceptorService', 
+    function ($q, $injector, localStorageService) {
 
         var authInterceptorServiceFactory = {};
 
         var _request = function (config) {
 
-            // config.headers = config.headers || {};
+            config.headers = config.headers || {};
 
-            // var authData = localStorageService.get('authorizationData');
-            // if (authData) {
-            //     config.headers.Authorization = authData.token;
-            // }
+            var userData = localStorageService.get('userData');
+            if (userData) {
+                config.headers.Authorization = userData.token;
+            }
 
             return config;
         }
 
         var _responseError = function (rejection) {
             if (rejection.status === 401 || rejection.status === 403) {
-                var authService = $injector.get('authService');
-                authService.logOut();
+                var accountService = $injector.get('accountService');
+                accountService.logOut();
             }
             return $q.reject(rejection);
         }
@@ -31,4 +29,4 @@ app.factory('authInterceptorService', [
 
         return authInterceptorServiceFactory;
     }
-]);
+);

@@ -1,29 +1,31 @@
 var express = require('express'),
-    mongoose = require('mongoose'),
-    cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
-    routes = require('./api/routes.js');
+    routes = require('./tsbb-api/routes.js');
 
 var app = express();
-var port = process.env.PORT || 3030,
-    dbUrl = process.env.DB_URL || 'localhost/tsbb';
 
+app.use(bodyParser.urlencoded({extended:true}));
+
+app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/tsbb-web'));
-// app.use(cookieParser); // read cookies (needed for auth)
-app.use(bodyParser.urlencoded({ // get information from html forms
-    extended: true
-}));
-
-// required for passport
-// app.use(express.session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
-// app.use(passport.initialize());
-// app.use(passport.session()); // persistent login sessions
-// app.use(flash()); // use connect-flash for flash messages stored in session
 
 routes(app, express, '/tsbb-api');
 
+var port = process.env.PORT || 3030;
+
 app.listen(port, function () {
     console.log('Running on port: ' + port);
-    mongoose.connect(dbUrl);
+
+
+    // Test Database Connection
+    // models.sequelize
+    //     .authenticate()
+    //     .then(function () {
+    //         console.log('Connection successful');
+    //     })
+    //     .catch(function (error) {
+    //         console.log("Error creating connection:", error);
+    //     });
+
 });
