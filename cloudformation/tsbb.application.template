@@ -1,0 +1,533 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "TSBB Application Server",
+    "Parameters": {
+        "TSBBVPC": {
+            "Description": "Select existing VPC where TSBB application will be hosted.",
+            "Type": "AWS::EC2::VPC::Id",
+            "ConstraintDescription": "must be existing VPC."
+        },
+        "TSBBKeyPair": {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+        },
+        "TSBBApplicationSecurityGroup": {
+            "Description": "TSBB application database security group.",
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "ConstraintDescription": "Must be existing application security group."
+        },
+        "TSBBELBSecurityGroup": {
+            "Description": "TSBB ELB security group.",
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "ConstraintDescription": "Must be existing ELB security group."
+        },
+        "TSBBBastionSecurityGroup": {
+            "Description": "TSBB bastion security group.",
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "ConstraintDescription": "Must be existing bastion security group."
+        },
+        "TSBBPublicSubnetAZ1": {
+            "Description": "TSBB application public subnet of AZ 1 for ssh access.",
+            "Type": "AWS::EC2::Subnet::Id",
+            "ConstraintDescription": "Must be existing public subnet."
+        },
+        "TSBBPublicSubnetAZ2": {
+            "Description": "TSBB application public subnet of AZ 2 for ssh access.",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "TSBBPrivateSubnetAZ1": {
+            "Description": "TSBB application private subnet of AZ 1 for ssh access.",
+            "Type": "AWS::EC2::Subnet::Id",
+            "ConstraintDescription": "Must be existing private subnet."
+        },
+        "TSBBPrivateSubnetAZ2": {
+            "Description": "TSBB application private subnet of AZ 2 for ssh access.",
+            "Type": "AWS::EC2::Subnet::Id",
+            "ConstraintDescription": "Must be existing private subnet."
+        },
+        "TSBBApplicationSourceS3Bucket": {
+            "Default": "tsbb-source-bundle",
+            "Description": "S3 Bucket containing your application package.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255
+        },
+        "TSBBPackagedZippedApplicationS3Bucket": {
+            "Default": "tsbb.zip",
+            "Description": "S3 Bucket key for your application package.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255
+        },
+        "TSBBApplicationName": {
+            "Description": "TSBB application name.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$"
+        },
+        "TSBBRDSDatabaseURL": {
+            "Type": "String",
+            "Description": "TSBB Database FQDN URL"
+        },
+        "TSBBDatabaseSchemaName": {
+            "Default": "tsbb",
+            "Type": "String",
+            "Description": "TSBB Database schema name",
+            "MinLength": 1,
+            "MaxLength": 30
+        },
+        "TSBBRDSDatabaseUser": {
+            "Default": "tsbbadmin",
+            "Type": "String",
+            "Description": "TSBB database user name",
+            "MinLength": 5,
+            "MaxLength": 16,
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "TSBB database name must begin with a letter and contain only alphanumeric characters. Between 5-16 in length."
+        },
+        "TSBBRDSDatabasePassword": {
+            "Default": "tsbbadmin",
+            "NoEcho": "true",
+            "Type": "String",
+            "Description": "TSBB database password",
+            "MinLength": 6,
+            "MaxLength": 41,
+            "AllowedPattern": "[a-zA-Z0-9]*",
+            "ConstraintDescription": "TSBB RDS database admin password must contain only alphanumeric characters. Between 6-41 in length."
+        },
+        "TSBBInstanceType": {
+            "Description": "TTSBB Application server instance type",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues": [
+                "t1.micro",
+                "t2.nano",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "g2.2xlarge",
+                "g2.8xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge",
+                "hi1.4xlarge",
+                "hs1.8xlarge",
+                "cr1.8xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "TSMinimumScalingSize": {
+            "Type": "String",
+            "Description": "TSBB Application Minimum Scaling Size",
+            "Default": 2
+        },
+        "TSMaximumScalingSize": {
+            "Type": "String",
+            "Description": "TTSBB Application Maximum Scaling Size",
+            "Default": 6
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "TSBBVPC",
+                        "TSBBPublicSubnetAZ1",
+                        "TSBBPublicSubnetAZ2",
+                        "TSBBPrivateSubnetAZ1",
+                        "TSBBPrivateSubnetAZ2"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "TSBBVPC": {
+                    "default": "TSBB Application VPC"
+                },
+                "TSBBPublicSubnetAZ1": {
+                    "default": "Public Subnet AZ1"
+                },
+                "TSBBPublicSubnetAZ2": {
+                    "default": "Public Subnet AZ2"
+                },
+                "TSBBPrivateSubnetAZ1": {
+                    "default": "Private Subnet AZ1"
+                },
+                "TSBBPrivateSubnetAZ2": {
+                    "default": "Private Subnet AZ2"
+                }
+            }
+        }
+    },
+    "Mappings": {
+        "StackMap": {
+            "node": {
+                "stackName": "64bit Amazon Linux 2016.09 v4.0.0 running Node.js"
+            }
+        }
+    },
+    "Resources": {
+        "TSBBApplication": {
+            "Type": "AWS::ElasticBeanstalk::Application",
+            "Properties": {
+                "ApplicationName": {
+                    "Ref": "TSBBApplicationName"
+                }
+            }
+        },
+        "TSBBApplicationVersion": {
+            "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+            "Properties": {
+                "ApplicationName": {
+                    "Ref": "TSBBApplication"
+                },
+                "SourceBundle": {
+                    "S3Bucket": {
+                        "Ref": "TSBBApplicationSourceS3Bucket"
+                    },
+                    "S3Key": {
+                        "Ref": "TSBBPackagedZippedApplicationS3Bucket"
+                    }
+                }
+            }
+        },
+        "TSBBEnvironment": {
+            "Type": "AWS::ElasticBeanstalk::Environment",
+            "Properties": {
+                "EnvironmentName": {
+                    "Ref": "TSBBApplicationName"
+                },
+                "ApplicationName": {
+                    "Ref": "TSBBApplication"
+                },
+                "TemplateName": {
+                    "Ref": "TSBBConfigurationTemplate"
+                },
+                "VersionLabel": {
+                    "Ref": "TSBBApplicationVersion"
+                }
+            }
+        },
+        "TSBBConfigurationTemplate": {
+            "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
+            "Properties": {
+                "ApplicationName": {
+                    "Ref": "TSBBApplication"
+                },
+                "SolutionStackName": {
+                    "Fn::FindInMap": [
+                        "StackMap",
+                        "node",
+                        "stackName"
+                    ]
+                },
+                "OptionSettings": [
+                    {
+                        "Namespace": "aws:elasticbeanstalk:environment",
+                        "OptionName": "EnvironmentType",
+                        "Value": "LoadBalanced"
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:asg",
+                        "OptionName": "MinSize",
+                        "Value": 2
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:asg",
+                        "OptionName": "MaxSize",
+                        "Value": 6
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:launchconfiguration",
+                        "OptionName": "SecurityGroups",
+                        "Value": {
+                            "Ref": "TSBBApplicationSecurityGroup"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:launchconfiguration",
+                        "OptionName": "SSHSourceRestriction",
+                        "Value": {
+                            "Fn::Join": [
+                                ",",
+                                [
+                                    "tcp, 22, 22",
+                                    {
+                                        "Ref": "TSBBBastionSecurityGroup"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:launchconfiguration",
+                        "OptionName": "InstanceType",
+                        "Value": {
+                            "Ref": "TSBBInstanceType"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:launchconfiguration",
+                        "OptionName": "IamInstanceProfile",
+                        "Value": {
+                            "Ref": "TSBBApplicationInstanceProfile"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:launchconfiguration",
+                        "OptionName": "EC2KeyName",
+                        "Value": {
+                            "Ref": "TSBBKeyPair"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:updatepolicy:rollingupdate",
+                        "OptionName": "RollingUpdateEnabled",
+                        "Value": true
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:updatepolicy:rollingupdate",
+                        "OptionName": "RollingUpdateType",
+                        "Value": "Health"
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:trigger",
+                        "OptionName": "MeasureName",
+                        "Value": "CPUUtilization"
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:trigger",
+                        "OptionName": "Unit",
+                        "Value": "Percent"
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:trigger",
+                        "OptionName": "UpperThreshold",
+                        "Value": 80
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:trigger",
+                        "OptionName": "LowerThreshold",
+                        "Value": 40
+                    },
+                    {
+                        "Namespace": "aws:ec2:vpc",
+                        "OptionName": "VPCId",
+                        "Value": {
+                            "Ref": "TSBBVPC"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:ec2:vpc",
+                        "OptionName": "Subnets",
+                        "Value": {
+                            "Fn::Join": [
+                                ",",
+                                [
+                                    {
+                                        "Ref": "TSBBPrivateSubnetAZ1"
+                                    },
+                                    {
+                                        "Ref": "TSBBPrivateSubnetAZ2"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Namespace": "aws:ec2:vpc",
+                        "OptionName": "ELBSubnets",
+                        "Value": {
+                            "Fn::Join": [
+                                ",",
+                                [
+                                    {
+                                        "Ref": "TSBBPublicSubnetAZ1"
+                                    },
+                                    {
+                                        "Ref": "TSBBPublicSubnetAZ2"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Namespace": "aws:elb:loadbalancer",
+                        "OptionName": "CrossZone",
+                        "Value": true
+                    },
+                    {
+                        "Namespace": "aws:elb:policies",
+                        "OptionName": "ConnectionDrainingEnabled",
+                        "Value": true
+                    },
+                    {
+                        "Namespace": "aws:elb:loadbalancer",
+                        "OptionName": "SecurityGroups",
+                        "Value": {
+                            "Ref": "TSBBELBSecurityGroup"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:elb:loadbalancer",
+                        "OptionName": "ManagedSecurityGroup",
+                        "Value": {
+                            "Ref": "TSBBELBSecurityGroup"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "AWS_REGION",
+                        "Value": {
+                            "Ref": "AWS::Region"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "DB_PASSWORD",
+                        "Value": {
+                            "Ref": "TSBBRDSDatabasePassword"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "DB_USER",
+                        "Value": {
+                            "Ref": "TSBBRDSDatabaseUser"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "DB_NAME",
+                        "Value": {
+                            "Ref": "TSBBDatabaseSchemaName"
+                        }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "DB_HOST",
+                        "Value": {
+                            "Ref": "TSBBRDSDatabaseURL"
+                        }
+                    }
+                ]
+            }
+        },
+        "TSBBApplicationRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "Path": "/",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "TSBBApplicationPolicies": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "TSBBApplication",
+                "Roles": [
+                    {
+                        "Ref": "TSBBApplicationRole"
+                    }
+                ],
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "*",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
+        "TSBBApplicationInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "TSBBApplicationRole"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "TSBBApplicationURL": {
+            "Description": "TSBB Application URL",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "http://",
+                        {
+                            "Fn::GetAtt": "TSBBEnvironment.EndpointURL"
+                        }
+                    ]
+                ]
+            }
+        }
+    }
+}

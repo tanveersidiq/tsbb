@@ -1,0 +1,258 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "TSBBRDSDatabaseAdminUser": {
+            "Default": "tsbbadmin",
+            "Type": "String",
+            "Description": "TSBB RDS database admin user name",
+            "MinLength": 5,
+            "MaxLength": 16,
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "TSBB RDS database admin name must begin with a letter and contain only alphanumeric characters. Between 5-16 in length."
+        },
+        "TSBBRDSDatabaseAdminPassword": {
+            "Default": "tsbbadmin",
+            "NoEcho": "true",
+            "Type": "String",
+            "Description": "TSBB RDS database admin password",
+            "MinLength": 6,
+            "MaxLength": 41,
+            "AllowedPattern": "[a-zA-Z0-9]*",
+            "ConstraintDescription": "TSBB RDS database admin password must contain only alphanumeric characters. Between 6-41 in length."
+        },
+        "TSBBRDSDatabaseName": {
+            "Default": "tsbb",
+            "Type": "String",
+            "Description": "TSBB RDS Database name",
+            "MinLength": 1,
+            "MaxLength": 30,
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "TSBB RDS database name must begin with a letter and contain only alphanumeric characters."
+        },
+        "TSBBRDSDatabaseSize": {
+            "Default": 5,
+            "Type": "String",
+            "Description": "TSBB Database storage size in gigabytes (GB)",
+            "MinLength": 1,
+            "AllowedPattern": "[5-9][0-9]*",
+            "ConstraintDescription": "TSBB RDS database must be at least 5 GB in size"
+        },
+        "TSBBRDSDatabaseInstanceClass": {
+            "Default": "db.t2.micro",
+            "Type": "String",
+            "Description": "TSBB database instance class, e.g. db.t2.micro (free tier)",
+            "ConstraintDescription": "Choose an instance class from the drop down",
+            "AllowedValues": [
+                "db.t2.micro",
+                "db.t2.small",
+                "db.t2.medium",
+                "db.t2.large",
+                "db.m4.large",
+                "db.m4.xlarge",
+                "db.m4.2xlarge",
+                "db.m4.4xlarge",
+                "db.m4.10xlarge",
+                "db.r3.large",
+                "db.r3.xlarge",
+                "db.r3.2xlarge",
+                "db.r3.4xlarge",
+                "db.r3.8xlarge"
+            ]
+        },
+        "TSBBEnableMultiAZDatabase": {
+            "Description": "Enable Multi AZ database deployment.",
+            "Default": "false",
+            "Type": "String",
+            "AllowedValues": [
+                "false",
+                "true"
+            ]
+        },
+        "TSBBDatabaseSecurityGroup": {
+            "Description": "TSBB RDS database security group.",
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "ConstraintDescription": "Must be existing database security group."
+        },
+        "TSBBPrivateSubnetAZ1": {
+            "Description": "TSBB RDS private subnet of AZ 1 for ssh and application access.",
+            "Type": "AWS::EC2::Subnet::Id",
+            "ConstraintDescription": "Must be existing private subnet."
+        },
+        "TSBBPrivateSubnetAZ2": {
+            "Description": "TSBB RDS private subnet of AZ 2 for ssh and application access.",
+            "Type": "AWS::EC2::Subnet::Id",
+            "ConstraintDescription": "Must be existing private subnet."
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "TSBBDatabaseSecurityGroup",
+                        "TSBBPrivateSubnetAZ1",
+                        "TSBBPrivateSubnetAZ2"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Database Configuration"
+                    },
+                    "Parameters": [
+                        "TSBBRDSDatabaseInstanceClass",
+                        "TSBBRDSDatabaseSize",
+                        "TSBBRDSDatabaseName",
+                        "TSBBRDSDatabaseAdminUser",
+                        "TSBBRDSDatabaseAdminPassword"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Environment Configuration"
+                    },
+                    "Parameters": [
+                        "TSBBEnableMultiAZDatabase"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "TSBBDatabaseSecurityGroup": {
+                    "default": "Database Security Group"
+                },
+                "TSBBPrivateSubnetAZ1": {
+                    "default": "Private Subnet AZ1"
+                },
+                "TSBBPrivateSubnetAZ2": {
+                    "default": "Private Subnet AZ2"
+                },
+                "TSBBRDSDatabaseName": {
+                    "default": "Database Name"
+                },
+                "TSBBRDSDatabaseAdminUser": {
+                    "default": "Database Admin User"
+                },
+                "TSBBRDSDatabaseAdminPassword": {
+                    "default": "Database Admin Password"
+                },
+                "TSBBRDSDatabaseInstanceClass": {
+                    "default": "Database Instance Class"
+                },
+                "TSBBRDSDatabaseSize": {
+                    "default": "Database Size"
+                },
+                "TSBBEnableMultiAZDatabase": {
+                    "default": "Enable Multi AZ Database"
+                }
+            }
+        }
+    },
+    "Resources": {
+        "TSBBDatabase": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBSubnetGroupName": {
+                    "Ref": "TSBBDatabaseSubnetGroup"
+                },
+                "VPCSecurityGroups": [
+                    {
+                        "Ref": "TSBBDatabaseSecurityGroup"
+                    }
+                ],
+                "Engine": "mysql",
+                "DBName": {
+                    "Ref": "TSBBRDSDatabaseName"
+                },
+                "MasterUsername": {
+                    "Ref": "TSBBRDSDatabaseAdminUser"
+                },
+                "MasterUserPassword": {
+                    "Ref": "TSBBRDSDatabaseAdminPassword"
+                },
+                "DBInstanceClass": {
+                    "Ref": "TSBBRDSDatabaseInstanceClass"
+                },
+                "AllocatedStorage": {
+                    "Ref": "TSBBRDSDatabaseSize"
+                },
+                "StorageType": "gp2",
+                "MultiAZ": {
+                     "Ref": "TSBBEnableMultiAZDatabase"
+                }
+            }
+        },
+        "TSBBDatabaseSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": "TSBB RDS Database subnet group",
+                "SubnetIds": [
+                    {
+                        "Ref": "TSBBPrivateSubnetAZ1"
+                    },
+                    {
+                        "Ref": "TSBBPrivateSubnetAZ2"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "TSBBRDSMySQLDatabaseId": {
+            "Description": "TSBB RDS MySQL Database Id",
+            "Value": {
+                "Ref": "TSBBDatabase"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "TSBBRDSMySQLDatabaseId"
+                }
+            }
+        },
+        "TSBBRDSMySQLDatabaseName": {
+            "Description": "TSBB RDS MySQL Database Id",
+            "Value": {
+                "Ref": "TSBBRDSDatabaseName"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "TSBBRDSMySQLDatabaseName"
+                }
+            }
+        },
+        "TSBBRDSMySQLDatabaseURL": {
+            "Description": "TSBB RDS MySQL Database URL",
+            "Value": {
+                "Fn::GetAtt": "TSBBDatabase.Endpoint.Address"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "TSBBRDSMySQLDatabaseURL"
+                }
+            }
+        },
+        "TSBBRDSMySQLDatabaseAdminUser": {
+            "Description": "TSBB RDS MySQL database admin User",
+            "Value": {
+                "Ref": "TSBBRDSDatabaseAdminUser"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "TSBBRDSMySQLDatabaseAdminUser"
+                }
+            }
+        },
+        "TSBBRDSMySQLDatabaseAdminPassword": {
+            "Description": "TSBB RDS MySQL database admin password",
+            "Value": {
+                "Ref": "TSBBRDSDatabaseAdminPassword"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "TSBBRDSMySQLDatabaseAdminPassword"
+                }
+            }
+        }
+    }
+}
