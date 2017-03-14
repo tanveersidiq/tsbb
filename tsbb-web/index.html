@@ -35,6 +35,7 @@
     <script src="services/bulletinService.js"></script>
     <script src="services/stickyService.js"></script>
     <script src="services/friendService.js"></script>
+    <script src="services/shareService.js"></script>
     <!-- Load directives -->
     <script src="directives/dragDirective.js"></script>
     <!-- Load controllers -->
@@ -66,12 +67,12 @@
                             <a href="/home"><i class="fa fa-list-alt fa-fw"></i> Bulletin Boards</a>
                             <ul class="nav nav-second-level collapse in" aria-expanded="true">
 
-                                <li data-ng-show="!$root.joinedBulletins.length"> <a href="#">No bulletins yet!</a> </li>
-                                <li data-ng-class="{activeBulletin:joinedBulletin.isActive}" data-ng-class="{activeBulletin:$root.joinedBulletin.isActive}"
-                                    ng-repeat="joinedBulletin in $root.joinedBulletins">
-                                    <a style="cursor:pointer;" data-ng-click="$root.active(joinedBulletin)" data-ng-class="{bulletinTitle:joinedBulletin.isActive}">
-                                        {{joinedBulletin.Title}}
-                                        </a>
+                                <li data-ng-show="!$root.bulletins.length"> <a href="#">No bulletins yet!</a> </li>
+                                <li data-ng-class="{activeBulletin:bulletin.isActive}" ng-repeat="bulletin in $root.bulletins">
+                                    <a style="cursor:pointer;" data-ng-click="$root.active(bulletin)" data-ng-class="{bulletinTitle:bulletin.isActive}">
+                                        <i data-ng-show="bulletin.isShared" class="fa fa-users fa-fw"></i>
+                                        <i data-ng-show="!bulletin.isShared" class="fa fa-user fa-fw"></i> {{bulletin.Title}}
+                                    </a>
                                 </li>
 
                             </ul>
@@ -83,7 +84,7 @@
                             <a href="/settings"><i class="fa fa-cog fa-fw"></i> Settings</a>
                         </li>
                         <li>
-                            <a href="" data-ng-click="logOut()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                            <a href="" data-ng-click="logOut()"><i class="fa fa-sign-out fa-fw"></i> Logout {{authentication.email}}</a>
                         </li>
                     </ul>
                 </div>

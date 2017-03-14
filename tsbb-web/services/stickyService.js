@@ -41,7 +41,7 @@ app.factory('stickyService',
           
             var config = {
                 params: {
-                    'Id': stickNote.Id
+                    'id': stickNote.Id
                 }
             };
 

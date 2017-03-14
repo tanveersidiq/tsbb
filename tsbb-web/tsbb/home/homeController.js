@@ -1,12 +1,10 @@
 'use strict';
 app.controller('homeController',
-    function ($scope, $rootScope, $uibModal, bulletinService, stickyService, notificationService) {
+    function ($scope, $rootScope, $uibModal, bulletinService, stickyService, shareService, notificationService) {
 
         $scope.activeBulletin = {
             title: "No bulletin!"
         };
-
-        $scope.stickyNotes = [];
 
         var _initialize = function () {
             getBulletins();
@@ -29,9 +27,9 @@ app.controller('homeController',
                     .createBulletin($scope.activeBulletin)
                     .then(function (response) {
                         $scope.activeBulletin.title = $scope.activeBulletin.name;
+                        $rootScope.bulletins.push(response.data);
+                        $rootScope.active(response.data);
                         notificationService.displaySuccess('Bulletin created successfully.');
-                        $rootScope.joinedBulletins.push(response.data);
-                        $scope.stickyNotes = [];
                     })
                     .catch(function (err) {
                         notificationService.displayError(err);
@@ -68,7 +66,7 @@ app.controller('homeController',
                 stickyService
                     .createStickNote(stickyNote)
                     .then(function (response) {
-                        $scope.stickyNotes.push(response.data);
+                        $scope.activeBulletin.BulletinStickies.push(response.data);
                         notificationService.displaySuccess('Sticky note created successfully.');
                     })
                     .catch(function (err) {
@@ -81,7 +79,8 @@ app.controller('homeController',
             stickyService
                 .deleteStickNote(sticky)
                 .then(function (response) {
-                    $scope.stickyNotes = $.grep($scope.stickyNotes, function (value) {
+
+                    $scope.activeBulletin.BulletinStickies = $.grep($scope.activeBulletin.BulletinStickies, function (value) {
                         return value.Id != sticky.Id;
                     });
                     notificationService.displaySuccess('Sticky note deleted successfully.');
@@ -96,7 +95,9 @@ app.controller('homeController',
             bulletin.isActive = true;
             $scope.activeBulletin = bulletin;
             $scope.activeBulletin.title = $scope.activeBulletin.Title;
-            $scope.stickyNotes = $scope.activeBulletin.BulletinStickies;
+            if (!$scope.activeBulletin.BulletinStickies) {
+                $scope.activeBulletin.BulletinStickies = [];
+            }
         };
 
         $scope.updateStickyNotePosition = function (sticky) {
@@ -129,7 +130,26 @@ app.controller('homeController',
             bulletinService
                 .bulletins($scope.user)
                 .then(function (response) {
-                    $rootScope.joinedBulletins = response.data;
+                    $rootScope.bulletins = response.data;
+                    $.grep($rootScope.bulletins, function (bulletin) {
+                        if(bulletin.BulletinShares.length > 0)
+                             bulletin.isShared = true;
+                    });
+                    shareService
+                        .sharedBulletins($scope.user)
+                        .then(function (response) {
+                            $.grep(response.data, function (bulletin) {
+                                var bulletinShare = bulletin.BulletinShare;
+                                bulletinShare.isShared = true;
+                                $rootScope.bulletins.push(bulletinShare);
+                            });
+                            if ($rootScope.bulletins.length > 0) {
+                                $rootScope.active($rootScope.bulletins[0]);
+                            }
+                        })
+                        .catch(function (err) {
+                            notificationService.displayError(err);
+                        });
                 })
                 .catch(function (err) {
                     notificationService.displayError(err);

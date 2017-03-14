@@ -1,49 +1,61 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "TSBBSSHFrom": {
-            "Description": "CIDR IP block for bastion hosts from which SSH is allowed",
+        "TSBBVPCCIDR": {
+            "Description": "VPC CIDR IP block",
             "Type": "String",
             "MinLength": 9,
             "MaxLength": 18,
-            "Default": "0.0.0.0/0"
+            "Default": "10.10.0.0/16"
+        },
+        "TSBBPublicSubnetAZ1CIDR": {
+            "Description": "Public Subnet AZ 1 CIDR IP block",
+            "Type": "String",
+            "MinLength": 9,
+            "MaxLength": 18,
+            "Default": "10.10.0.0/24"
+        },
+        "TSBBPrivateSubnetAZ1CIDR": {
+            "Description": "Private Subnet AZ 1 CIDR IP block",
+            "Type": "String",
+            "MinLength": 9,
+            "MaxLength": 18,
+            "Default": "10.10.1.0/24"
+        },
+        "TSBBPrivateSubnetAZ2CIDR": {
+            "Description": "Private Subnet AZ 2 CIDR IP block",
+            "Type": "String",
+            "MinLength": 9,
+            "MaxLength": 18,
+            "Default": "10.10.2.0/24"
         }
     },
     "Metadata": {
         "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
-                    "Label": {
-                        "default": "Dynamic Configuration"
-                    },
-                    "Parameters": [
-                        "TSBBSSHFrom"
-                    ]
-                }
-            ],
+            "ParameterGroups": [{
+                "Label": {
+                    "default": "Network Configuration"
+                },
+                "Parameters": [
+                    "TSBBVPCCIDR",
+                    "TSBBPublicSubnetAZ1CIDR",
+                    "TSBBPrivateSubnetAZ1CIDR",
+                    "TSBBPrivateSubnetAZ2CIDR"
+                ]
+            }],
             "ParameterLabels": {
-                "TSBBSSHFrom": {
-                    "default": "SSH From CIDR"
+                "TSBBVPCCIDR": {
+                    "default": "VPC CIDR Ip Block"
+                },
+                "TSBBPublicSubnetAZ1CIDR": {
+                    "default": "Public Subnet AZ 1 CIDR Ip Block"
+                },
+                "TSBBPrivateSubnetAZ1CIDR": {
+                    "default": "Private Subnet AZ 1 CIDR Ip Block"
+                },
+                "TSBBPrivateSubnetAZ2CIDR": {
+                    "default": "Private Subnet AZ 2 CIDR Ip Block"
                 }
-            }
-        }
-    },
-    "Mappings": {
-        "CIDRMap": {
-            "TSBBVPC": {
-                "CIDR": "10.10.0.0/16"
-            },
-            "TSBBPublicSubnetAZ1": {
-                "CIDR": "10.10.0.0/24"
-            },
-            "TSBBPublicSubnetAZ2": {
-                "CIDR": "10.10.1.0/24"
-            },
-            "TSBBPrivateSubnetAZ1": {
-                "CIDR": "10.10.2.0/24"
-            },
-            "TSBBPrivateSubnetAZ2": {
-                "CIDR": "10.10.3.0/24"
             }
         }
     },
@@ -52,22 +64,16 @@
             "Type": "AWS::EC2::VPC",
             "Properties": {
                 "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "CIDRMap",
-                        "TSBBVPC",
-                        "CIDR"
-                    ]
+                    "Ref": "TSBBVPCCIDR"
                 },
                 "EnableDnsSupport": true,
                 "EnableDnsHostnames": true,
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Ref": "AWS::StackName"
-                        }
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Ref": "AWS::StackName"
                     }
-                ]
+                }]
             }
         },
         "TSBBPublicSubnetAZ1": {
@@ -77,11 +83,7 @@
                     "Ref": "TSBBVPC"
                 },
                 "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "CIDRMap",
-                        "TSBBPublicSubnetAZ1",
-                        "CIDR"
-                    ]
+                    "Ref": "TSBBPublicSubnetAZ1CIDR"
                 },
                 "AvailabilityZone": {
                     "Fn::Select": [
@@ -93,47 +95,12 @@
                         }
                     ]
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "TSBBPublicSubnetAZ1"
-                        }
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Sub": "TSBBPublicSubnetAZ1"
                     }
-                ]
-            }
-        },
-        "TSBBPublicSubnetAZ2": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "TSBBVPC"
-                },
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "CIDRMap",
-                        "TSBBPublicSubnetAZ2",
-                        "CIDR"
-                    ]
-                },
-                "AvailabilityZone": {
-                    "Fn::Select": [
-                        1,
-                        {
-                            "Fn::GetAZs": {
-                                "Ref": "AWS::Region"
-                            }
-                        }
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "TSBBPublicSubnetAZ2"
-                        }
-                    }
-                ]
+                }]
             }
         },
         "TSBBPrivateSubnetAZ1": {
@@ -143,11 +110,7 @@
                     "Ref": "TSBBVPC"
                 },
                 "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "CIDRMap",
-                        "TSBBPrivateSubnetAZ1",
-                        "CIDR"
-                    ]
+                    "Ref": "TSBBPrivateSubnetAZ1CIDR"
                 },
                 "AvailabilityZone": {
                     "Fn::Select": [
@@ -159,14 +122,12 @@
                         }
                     ]
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "TSBBPrivateSubnetAZ1"
-                        }
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Sub": "TSBBPrivateSubnetAZ1"
                     }
-                ]
+                }]
             }
         },
         "TSBBPrivateSubnetAZ2": {
@@ -176,11 +137,7 @@
                     "Ref": "TSBBVPC"
                 },
                 "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "CIDRMap",
-                        "TSBBPrivateSubnetAZ2",
-                        "CIDR"
-                    ]
+                    "Ref": "TSBBPrivateSubnetAZ2CIDR"
                 },
                 "AvailabilityZone": {
                     "Fn::Select": [
@@ -192,27 +149,23 @@
                         }
                     ]
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "TSBBPrivateSubnetAZ2"
-                        }
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Sub": "TSBBPrivateSubnetAZ2"
                     }
-                ]
+                }]
             }
         },
         "TSBBInternetGateway": {
             "Type": "AWS::EC2::InternetGateway",
             "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "TSBBInternetGateway"
-                        }
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Sub": "TSBBInternetGateway"
                     }
-                ]
+                }]
             }
         },
         "TSBBVPCGatewayAttachment": {
@@ -232,14 +185,12 @@
                 "VpcId": {
                     "Ref": "TSBBVPC"
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "TSBBPublicRouteTable"
-                        }
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Sub": "TSBBPublicRouteTable"
                     }
-                ]
+                }]
             }
         },
         "TSBBPublicRoute": {
@@ -266,33 +217,11 @@
                 }
             }
         },
-        "TSBBPublicSubnetRouteTableAssociationAZ2": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "TSBBPublicSubnetAZ2"
-                },
-                "RouteTableId": {
-                    "Ref": "TSBBPublicRouteTable"
-                }
-            }
-        },
         "TSBBPublicSubnetNetworkAclAssociationAZ1": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
                 "SubnetId": {
                     "Ref": "TSBBPublicSubnetAZ1"
-                },
-                "NetworkAclId": {
-                    "Fn::GetAtt": "TSBBVPC.DefaultNetworkAcl"
-                }
-            }
-        },
-        "TSBBPublicSubnetNetworkAclAssociationAZ2": {
-            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "TSBBPublicSubnetAZ2"
                 },
                 "NetworkAclId": {
                     "Fn::GetAtt": "TSBBVPC.DefaultNetworkAcl"
@@ -306,20 +235,16 @@
                 "VpcId": {
                     "Ref": "TSBBVPC"
                 },
-                "SecurityGroupIngress": [
-                    {
-                        "CidrIp": "0.0.0.0/0",
-                        "IpProtocol": "tcp",
-                        "ToPort": 80,
-                        "FromPort": 80
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "TSBBELBSecurityGroup"
-                    }
-                ]
+                "SecurityGroupIngress": [{
+                    "CidrIp": "0.0.0.0/0",
+                    "IpProtocol": "tcp",
+                    "ToPort": 80,
+                    "FromPort": 80
+                }],
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": "TSBBELBSecurityGroup"
+                }]
             }
         },
         "TSBBELBSecurityGroupToAppEgress": {
@@ -343,30 +268,18 @@
                 "VpcId": {
                     "Ref": "TSBBVPC"
                 },
-                "SecurityGroupIngress": [
-                    {
-                        "SourceSecurityGroupId": {
-                            "Ref": "TSBBELBSecurityGroup"
-                        },
-                        "IpProtocol": "tcp",
-                        "ToPort": 80,
-                        "FromPort": 80
+                "SecurityGroupIngress": [{
+                    "SourceSecurityGroupId": {
+                        "Ref": "TSBBELBSecurityGroup"
                     },
-                    {
-                        "SourceSecurityGroupId": {
-                            "Ref": "TSBBBastionSecurityGroup"
-                        },
-                        "IpProtocol": "tcp",
-                        "ToPort": 22,
-                        "FromPort": 22
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "TSBBApplicationSecurityGroup"
-                    }
-                ]
+                    "IpProtocol": "tcp",
+                    "ToPort": 80,
+                    "FromPort": 80
+                }],
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": "TSBBApplicationSecurityGroup"
+                }]
             }
         },
         "TSBBApplicationSecurityGroupFromELBIngress": {
@@ -383,81 +296,6 @@
                 }
             }
         },
-        "TSBBApplicationSecurityGroupFromBastionIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "Properties": {
-                "GroupId": {
-                    "Ref": "TSBBApplicationSecurityGroup"
-                },
-                "IpProtocol": "tcp",
-                "ToPort": 22,
-                "FromPort": 22,
-                "SourceSecurityGroupId": {
-                    "Ref": "TSBBBastionSecurityGroup"
-                }
-            }
-        },
-        "TSBBBastionSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Enable access to the bastion host",
-                "VpcId": {
-                    "Ref": "TSBBVPC"
-                },
-                "SecurityGroupIngress": [
-                    {
-                        "CidrIp": {
-                            "Ref": "TSBBSSHFrom"
-                        },
-                        "IpProtocol": "tcp",
-                        "ToPort": 22,
-                        "FromPort": 22
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "CidrIp": "0.0.0.0/0",
-                        "IpProtocol": "tcp",
-                        "ToPort": 80,
-                        "FromPort": 80
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "TSBBBastionSecurityGroup"
-                    }
-                ]
-            }
-        },
-        "TSBBBastionSecurityGroupToAppEgress": {
-            "Type": "AWS::EC2::SecurityGroupEgress",
-            "Properties": {
-                "GroupId": {
-                    "Ref": "TSBBBastionSecurityGroup"
-                },
-                "IpProtocol": "tcp",
-                "ToPort": 22,
-                "FromPort": 22,
-                "DestinationSecurityGroupId": {
-                    "Ref": "TSBBApplicationSecurityGroup"
-                }
-            }
-        },
-        "TSBBBastionSecurityGroupToDbEgress": {
-            "Type": "AWS::EC2::SecurityGroupEgress",
-            "Properties": {
-                "GroupId": {
-                    "Ref": "TSBBBastionSecurityGroup"
-                },
-                "IpProtocol": "tcp",
-                "ToPort": 3306,
-                "FromPort": 3306,
-                "DestinationSecurityGroupId": {
-                    "Ref": "TSBBDatabaseSecurityGroup"
-                }
-            }
-        },
         "TSBBDatabaseSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -465,34 +303,16 @@
                 "VpcId": {
                     "Ref": "TSBBVPC"
                 },
-                "SecurityGroupEgress": [
-                    {
-                        "CidrIp": "0.0.0.0/0",
-                        "IpProtocol": "tcp",
-                        "ToPort": 3306,
-                        "FromPort": 3306
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "TSBBDatabaseSecurityGroup"
-                    }
-                ]
-            }
-        },
-        "TSBBDatabaseSecurityGroupFromBastionIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "Properties": {
-                "GroupId": {
-                    "Ref": "TSBBDatabaseSecurityGroup"
-                },
-                "IpProtocol": "tcp",
-                "ToPort": 3306,
-                "FromPort": 3306,
-                "SourceSecurityGroupId": {
-                    "Ref": "TSBBBastionSecurityGroup"
-                }
+                "SecurityGroupEgress": [{
+                    "CidrIp": "0.0.0.0/0",
+                    "IpProtocol": "tcp",
+                    "ToPort": 3306,
+                    "FromPort": 3306
+                }],
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": "TSBBDatabaseSecurityGroup"
+                }]
             }
         },
         "TSBBDatabaseSecurityGroupFromAppIngress": {
@@ -534,12 +354,10 @@
                 "VpcId": {
                     "Ref": "TSBBVPC"
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "TSBBPrivateNatRouteTable"
-                    }
-                ]
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": "TSBBPrivateNatRouteTable"
+                }]
             }
         },
         "TSBBNatRoute": {
@@ -601,17 +419,6 @@
                 }
             }
         },
-        "TSBBPublicSubnetAZ2Id": {
-            "Description": "TSBB Public subnet AZ 2 ID",
-            "Value": {
-                "Ref": "TSBBPublicSubnetAZ2"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "TSBBPublicSubnetAZ2Id"
-                }
-            }
-        },
         "TSBBPrivateSubnetAZ1Id": {
             "Description": "TSBB Private subnet AZ 1 ID",
             "Value": {
@@ -653,17 +460,6 @@
             "Export": {
                 "Name": {
                     "Fn::Sub": "TSBBApplicationSecurityGroupId"
-                }
-            }
-        },
-        "TSBBBastionSecurityGroupId": {
-            "Description": "Security group ID for bastion host",
-            "Value": {
-                "Fn::GetAtt": "TSBBBastionSecurityGroup.GroupId"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "TSBBBastionSecurityGroupId"
                 }
             }
         },

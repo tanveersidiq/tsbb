@@ -10,7 +10,7 @@
             "program": "${workspaceRoot}\\server.js",
             "env": {
                 "PORT": "3030",
-                "DATABASE_URL": "mysql://tsbb:rootroot@ttlynozs62k197.cyj8kuphoddi.us-east-1.rds.amazonaws.com:3306/tsbb",
+                "DATABASE_URL": "mysql://root:root@localhost/tsbb",
                 "JWT_SECRET": "imlovingit"
             }
         },

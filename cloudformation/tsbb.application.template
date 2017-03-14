@@ -7,34 +7,10 @@
             "Type": "AWS::EC2::VPC::Id",
             "ConstraintDescription": "must be existing VPC."
         },
-        "TSBBKeyPair": {
-            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
-            "Type": "AWS::EC2::KeyPair::KeyName",
-            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
-        },
-        "TSBBApplicationSecurityGroup": {
-            "Description": "TSBB application database security group.",
-            "Type": "AWS::EC2::SecurityGroup::Id",
-            "ConstraintDescription": "Must be existing application security group."
-        },
-        "TSBBELBSecurityGroup": {
-            "Description": "TSBB ELB security group.",
-            "Type": "AWS::EC2::SecurityGroup::Id",
-            "ConstraintDescription": "Must be existing ELB security group."
-        },
-        "TSBBBastionSecurityGroup": {
-            "Description": "TSBB bastion security group.",
-            "Type": "AWS::EC2::SecurityGroup::Id",
-            "ConstraintDescription": "Must be existing bastion security group."
-        },
         "TSBBPublicSubnetAZ1": {
             "Description": "TSBB application public subnet of AZ 1 for ssh access.",
             "Type": "AWS::EC2::Subnet::Id",
             "ConstraintDescription": "Must be existing public subnet."
-        },
-        "TSBBPublicSubnetAZ2": {
-            "Description": "TSBB application public subnet of AZ 2 for ssh access.",
-            "Type": "AWS::EC2::Subnet::Id"
         },
         "TSBBPrivateSubnetAZ1": {
             "Description": "TSBB application private subnet of AZ 1 for ssh access.",
@@ -46,56 +22,15 @@
             "Type": "AWS::EC2::Subnet::Id",
             "ConstraintDescription": "Must be existing private subnet."
         },
-        "TSBBApplicationSourceS3Bucket": {
-            "Default": "tsbb-source-bundle",
-            "Description": "S3 Bucket containing your application package.",
-            "Type": "String",
-            "MinLength": 1,
-            "MaxLength": 255
+        "TSBBApplicationSecurityGroup": {
+            "Description": "TSBB application database security group.",
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "ConstraintDescription": "Must be existing application security group."
         },
-        "TSBBPackagedZippedApplicationS3Bucket": {
-            "Default": "tsbb.zip",
-            "Description": "S3 Bucket key for your application package.",
-            "Type": "String",
-            "MinLength": 1,
-            "MaxLength": 255
-        },
-        "TSBBApplicationName": {
-            "Description": "TSBB application name.",
-            "Type": "String",
-            "MinLength": 1,
-            "MaxLength": 255,
-            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$"
-        },
-        "TSBBRDSDatabaseURL": {
-            "Type": "String",
-            "Description": "TSBB Database FQDN URL"
-        },
-        "TSBBDatabaseSchemaName": {
-            "Default": "tsbb",
-            "Type": "String",
-            "Description": "TSBB Database schema name",
-            "MinLength": 1,
-            "MaxLength": 30
-        },
-        "TSBBRDSDatabaseUser": {
-            "Default": "tsbbadmin",
-            "Type": "String",
-            "Description": "TSBB database user name",
-            "MinLength": 5,
-            "MaxLength": 16,
-            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
-            "ConstraintDescription": "TSBB database name must begin with a letter and contain only alphanumeric characters. Between 5-16 in length."
-        },
-        "TSBBRDSDatabasePassword": {
-            "Default": "tsbbadmin",
-            "NoEcho": "true",
-            "Type": "String",
-            "Description": "TSBB database password",
-            "MinLength": 6,
-            "MaxLength": 41,
-            "AllowedPattern": "[a-zA-Z0-9]*",
-            "ConstraintDescription": "TSBB RDS database admin password must contain only alphanumeric characters. Between 6-41 in length."
+        "TSBBELBSecurityGroup": {
+            "Description": "TSBB ELB security group.",
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "ConstraintDescription": "Must be existing ELB security group."
         },
         "TSBBInstanceType": {
             "Description": "TTSBB Application server instance type",
@@ -159,30 +94,112 @@
             ],
             "ConstraintDescription": "must be a valid EC2 instance type."
         },
-        "TSMinimumScalingSize": {
+        "TSBBMinimumScalingSize": {
             "Type": "String",
             "Description": "TSBB Application Minimum Scaling Size",
             "Default": 2
         },
-        "TSMaximumScalingSize": {
+        "TSBBMaximumScalingSize": {
             "Type": "String",
             "Description": "TTSBB Application Maximum Scaling Size",
             "Default": 6
+        },
+        "TSBBApplicationName": {
+            "Description": "TSBB application name.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$"
+        },
+        "TSBBApplicationSourceS3Bucket": {
+            "Default": "tsbb-source-bundle",
+            "Description": "S3 Bucket containing your application package.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255
+        },
+        "TSBBPackagedZippedApplicationS3Bucket": {
+            "Default": "tsbb.zip",
+            "Description": "S3 Bucket key for your application package.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255
+        },
+        "TSBBRDSDatabaseURL": {
+            "Type": "String",
+            "Description": "TSBB Database FQDN URL"
+        },
+        "TSBBDatabaseSchemaName": {
+            "Default": "tsbb",
+            "Type": "String",
+            "Description": "TSBB Database schema name",
+            "MinLength": 1,
+            "MaxLength": 30
+        },
+        "TSBBRDSDatabaseUser": {
+            "Default": "tsbbadmin",
+            "Type": "String",
+            "Description": "TSBB database user name",
+            "MinLength": 5,
+            "MaxLength": 16,
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "TSBB database name must begin with a letter and contain only alphanumeric characters. Between 5-16 in length."
+        },
+        "TSBBRDSDatabasePassword": {
+            "Default": "tsbbadmin",
+            "NoEcho": "true",
+            "Type": "String",
+            "Description": "TSBB database password",
+            "MinLength": 6,
+            "MaxLength": 41,
+            "AllowedPattern": "[a-zA-Z0-9]*",
+            "ConstraintDescription": "TSBB RDS database admin password must contain only alphanumeric characters. Between 6-41 in length."
         }
     },
     "Metadata": {
         "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
+            "ParameterGroups": [{
                     "Label": {
                         "default": "Network Configuration"
                     },
                     "Parameters": [
                         "TSBBVPC",
                         "TSBBPublicSubnetAZ1",
-                        "TSBBPublicSubnetAZ2",
                         "TSBBPrivateSubnetAZ1",
                         "TSBBPrivateSubnetAZ2"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Security Configuration"
+                    },
+                    "Parameters": [
+                        "TSBBApplicationSecurityGroup",
+                        "TSBBELBSecurityGroup"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Application Configuration"
+                    },
+                    "Parameters": [
+                        "TSBBInstanceType",
+                        "TSBBMinimumScalingSize",
+                        "TSBBMaximumScalingSize",
+                        "TSBBApplicationName",
+                        "TSBBApplicationSourceS3Bucket",
+                        "TSBBPackagedZippedApplicationS3Bucket"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Database Configuration"
+                    },
+                    "Parameters": [
+                        "TSBBRDSDatabaseURL",
+                        "TSBBDatabaseSchemaName",
+                        "TSBBRDSDatabaseUser",
+                        "TSBBRDSDatabasePassword"
                     ]
                 }
             ],
@@ -193,14 +210,47 @@
                 "TSBBPublicSubnetAZ1": {
                     "default": "Public Subnet AZ1"
                 },
-                "TSBBPublicSubnetAZ2": {
-                    "default": "Public Subnet AZ2"
-                },
                 "TSBBPrivateSubnetAZ1": {
                     "default": "Private Subnet AZ1"
                 },
                 "TSBBPrivateSubnetAZ2": {
                     "default": "Private Subnet AZ2"
+                },
+                "TSBBApplicationSecurityGroup": {
+                    "default": "Application Security Group"
+                },
+                "TSBBELBSecurityGroup": {
+                    "default": "ELB Security Group"
+                },
+                "TSBBInstanceType": {
+                    "default": "Application Instance Type"
+                },
+                "TSBBMinimumScalingSize": {
+                    "default": "Minimum Scaling Size"
+                },
+                "TSBBMaximumScalingSize": {
+                    "default": "Maximum Scaling Size"
+                },
+                "TSBBApplicationName": {
+                    "default": "Application Name"
+                },
+                "TSBBApplicationSourceS3Bucket": {
+                    "default": "Application Source S3 Bucket"
+                },
+                "TSBBPackagedZippedApplicationS3Bucket": {
+                    "default": "Packaged Zipped Application in S3 Bucket"
+                },
+                "TSBBRDSDatabaseURL": {
+                    "default": "Application Database URL"
+                },
+                "TSBBDatabaseSchemaName": {
+                    "default": "Database Schema Name"
+                },
+                "TSBBRDSDatabaseUser": {
+                    "default": "Database User"
+                },
+                "TSBBRDSDatabasePassword": {
+                    "default": "Database Password"
                 }
             }
         }
@@ -267,8 +317,7 @@
                         "stackName"
                     ]
                 },
-                "OptionSettings": [
-                    {
+                "OptionSettings": [{
                         "Namespace": "aws:elasticbeanstalk:environment",
                         "OptionName": "EnvironmentType",
                         "Value": "LoadBalanced"
@@ -276,33 +325,22 @@
                     {
                         "Namespace": "aws:autoscaling:asg",
                         "OptionName": "MinSize",
-                        "Value": 2
+                        "Value": {
+                            "Ref": "TSBBMinimumScalingSize"
+                        }
                     },
                     {
                         "Namespace": "aws:autoscaling:asg",
                         "OptionName": "MaxSize",
-                        "Value": 6
+                        "Value": {
+                            "Ref": "TSBBMaximumScalingSize"
+                        }
                     },
                     {
                         "Namespace": "aws:autoscaling:launchconfiguration",
                         "OptionName": "SecurityGroups",
                         "Value": {
                             "Ref": "TSBBApplicationSecurityGroup"
-                        }
-                    },
-                    {
-                        "Namespace": "aws:autoscaling:launchconfiguration",
-                        "OptionName": "SSHSourceRestriction",
-                        "Value": {
-                            "Fn::Join": [
-                                ",",
-                                [
-                                    "tcp, 22, 22",
-                                    {
-                                        "Ref": "TSBBBastionSecurityGroup"
-                                    }
-                                ]
-                            ]
                         }
                     },
                     {
@@ -317,13 +355,6 @@
                         "OptionName": "IamInstanceProfile",
                         "Value": {
                             "Ref": "TSBBApplicationInstanceProfile"
-                        }
-                    },
-                    {
-                        "Namespace": "aws:autoscaling:launchconfiguration",
-                        "OptionName": "EC2KeyName",
-                        "Value": {
-                            "Ref": "TSBBKeyPair"
                         }
                     },
                     {
@@ -368,9 +399,7 @@
                         "OptionName": "Subnets",
                         "Value": {
                             "Fn::Join": [
-                                ",",
-                                [
-                                    {
+                                ",", [{
                                         "Ref": "TSBBPrivateSubnetAZ1"
                                     },
                                     {
@@ -385,15 +414,9 @@
                         "OptionName": "ELBSubnets",
                         "Value": {
                             "Fn::Join": [
-                                ",",
-                                [
-                                    {
-                                        "Ref": "TSBBPublicSubnetAZ1"
-                                    },
-                                    {
-                                        "Ref": "TSBBPublicSubnetAZ2"
-                                    }
-                                ]
+                                ",", [{
+                                    "Ref": "TSBBPublicSubnetAZ1"
+                                }]
                             ]
                         }
                     },
@@ -465,19 +488,17 @@
                 "Path": "/",
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {
-                                "Service": [
-                                    "ec2.amazonaws.com"
-                                ]
-                            },
-                            "Action": [
-                                "sts:AssumeRole"
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "ec2.amazonaws.com"
                             ]
-                        }
-                    ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }]
                 }
             }
         },
@@ -485,20 +506,16 @@
             "Type": "AWS::IAM::Policy",
             "Properties": {
                 "PolicyName": "TSBBApplication",
-                "Roles": [
-                    {
-                        "Ref": "TSBBApplicationRole"
-                    }
-                ],
+                "Roles": [{
+                    "Ref": "TSBBApplicationRole"
+                }],
                 "PolicyDocument": {
                     "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": "*",
-                            "Resource": "*"
-                        }
-                    ]
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Action": "*",
+                        "Resource": "*"
+                    }]
                 }
             }
         },
@@ -506,11 +523,9 @@
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Path": "/",
-                "Roles": [
-                    {
-                        "Ref": "TSBBApplicationRole"
-                    }
-                ]
+                "Roles": [{
+                    "Ref": "TSBBApplicationRole"
+                }]
             }
         }
     },
@@ -519,8 +534,7 @@
             "Description": "TSBB Application URL",
             "Value": {
                 "Fn::Join": [
-                    "",
-                    [
+                    "", [
                         "http://",
                         {
                             "Fn::GetAtt": "TSBBEnvironment.EndpointURL"

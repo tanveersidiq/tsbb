@@ -75,11 +75,10 @@ var routes = function (router, models) {
                 });
         })
         .delete('/sticky', function (req, res) {
-
             models.Stickies
                 .count({
                     where: {
-                        Id: req.query.Id
+                        Id: req.query.id
                     }
                 })
                 .then(function (stickyCount) {

@@ -10,10 +10,16 @@ var routes = function (router, models) {
                     },
                     order: 'Title ASC',
                     include: [{
-                        model: models.Stickies,
-                        as: 'BulletinStickies',
-                        required: false
-                    }]
+                            model: models.Stickies,
+                            as: 'BulletinStickies',
+                            required: false
+                        },
+                        {
+                            model: models.BulletinShares,
+                            as: 'BulletinShares',
+                            required: false
+                        }
+                    ]
                 })
                 .then(function (bulletins) {
                     res.status(200).json(bulletins);

@@ -7,7 +7,8 @@ module.exports = function (app, express, routeStart) {
     app.use(routeStart, authorize, require('./routes/bulletin')(express, models));
     app.use(routeStart, authorize, require('./routes/sticky')(express, models));
     app.use(routeStart, authorize, require('./routes/friend')(express, models));
-    
+    app.use(routeStart, authorize, require('./routes/share')(express, models));
+
     app.use('/', function (req, res) {
         res.send('TSBB API is at http://' + req.headers.host + '/tsbb-api');
     });

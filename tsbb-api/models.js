@@ -53,8 +53,18 @@ db.Users.hasMany(db.Friends, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE'
 });
-
-db.Friends.belongsTo(db.Users, {as: 'FriendUser', foreignKey: 'UserFriend'});
+db.Bulletins.hasMany(db.BulletinShares, {
+    as: 'BulletinShares',
+    foreignKey: 'Bulletin',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+});
+db.Friends.hasMany(db.BulletinShares, {
+    as: 'BulletinShareFriend',
+    foreignKey: 'User',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+});
 
 db.Bulletins.hasMany(db.Stickies, {
     as: 'BulletinStickies',
@@ -62,17 +72,11 @@ db.Bulletins.hasMany(db.Stickies, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE'
 });
-// db.FileReferences.hasMany(db.Jobs, {
-//     as: 'Jobs',
-//     foreignKey: 'FileReference',
-//     onDelete: 'CASCADE',
-//     onUpdate: 'CASCADE'
-// });
 
-// db.Jobs.belongsTo(db.Users, {
-//     as: 'User',
-//     foreignKey: 'User_ID_Notify'
-// });
+db.Friends.belongsTo(db.Users, {as: 'FriendUser', foreignKey: 'UserFriend'});
+db.Friends.belongsTo(db.Users, {as: 'FriendUser2', foreignKey: 'User'});
+db.BulletinShares.belongsTo(db.Bulletins, {as: 'BulletinShare', foreignKey: 'Bulletin'});
+db.BulletinShares.belongsTo(db.Friends, {as: 'FriendShared', foreignKey: 'User'});
 
 sequelize
     .sync()

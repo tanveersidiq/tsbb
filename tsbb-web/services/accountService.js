@@ -63,12 +63,6 @@ app.factory('accountService',
             $http
                 .post(serviceBase + 'account/register', userData)
                 .then(function (response) {
-
-                    _authentication.token = response.data.token;
-                    _authentication.authenticated = true;
-
-                    localStorageService.set('userData', _authentication);
-
                     deferred.resolve(response);
                 })
                 .catch(function (err) {

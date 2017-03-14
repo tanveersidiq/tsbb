@@ -38,3 +38,6 @@ jspm_packages
 
 # Bower Dependency
 tsbb-web/libs
+
+# Backup Code
+.backupStable

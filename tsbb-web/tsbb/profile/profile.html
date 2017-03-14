@@ -1,5 +1,51 @@
 <div data-ng-init="initialize()">
     <br/>
+    <!-- Unfriend Dialog START -->
+    <div class="modal" id="unfriend" tabindex="-1" role="dialog" aria-labelledby="unfriendLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Are you sure?</h4>
+                </div>
+                <div class="modal-body">
+                    <p> Do you really want to unfriend <b> {{unfriend.FriendUser.Email}}</b>? </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" ng-click="cancel(unfriend)" data-dismiss="modal">Unfriend</button>
+                        <button id="btnClose" type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Unfriend Dialog END -->
+    <!-- Share Bulletin Dialog START -->
+    <div class="modal" id="shareBulletin" tabindex="-1" role="dialog" aria-labelledby="unfriendLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Share Bulletin</h4>
+                </div>
+                <div class="modal-body">
+                    <p> Select bulletin to be shared with <b> {{friend.FriendUser.Email}}</b>. </p>
+                    <table class="table table-hover table-striped">
+                        <tr data-ng-repeat="bulletin in bulletins" data-ng-show="!bulletin.isShared">
+                            <td>{{bulletin.Title}}</td>
+                            <td><input type="checkbox" ng-model="bulletin.share" value="{{bulletin}}" /></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" ng-click="share(bulletins, friend)" data-dismiss="modal">Share</button>
+                        <button id="btnClose" type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Share Bulletin Dialog END -->
     <div class="row">
         <div class="col-lg-6 col-md-6">
             <div class="panel panel-primary">
@@ -52,51 +98,48 @@
                 <h3 class="panel-title">Friends</h3>
             </div>
             <div class="panel-body">
-                <h4>Share my boards with</h4>
+                <h4>Search friends</h4>
                 <form>
-                    <input type="text" data-ng-model="selected" ng-model-options="searchFriendsOptions" uib-typeahead="user.Email for user in users | filter:$viewValue | limitTo:8"
-                        typeahead-editable="false" class="form-control" style="width:300px;display:inline-block;" placeholder="Search for users...">
-                    <button class="btn btn-success" ng-click="addFriendRequest(selectedUser)" style="display:inline-block;margin-left:40px;"> <span class="glyphicon glyphicon-plus"></span> Add Friend </button>
+                    <input type="text" data-ng-model="select" ng-model-options="searchFriendsOptions" uib-typeahead="user.Email for user in users | filter:$viewValue | limitTo:8"
+                        typeahead-editable="false" class="form-control" style="width:300px;display:inline-block;" placeholder="Search for friends...">
+                    <button class="btn btn-success" ng-click="add(selectedUser)" style="display:inline-block;margin-left:40px;"> <span class="fa fa-plus fa-fw"></span> Add Friend </button>
                 </form>
 
                 <!-- Friends -->
                 <div class="row">
                     <div class="col-lg-4 col-md-4">
                         <h4 style="padding-top:15px;"> Friends </h4>
-                        <p ng-show="!theFriends.length"><span class="glyphicon glyphicon-info-sign"></span> No friends!</p>
+                        <p ng-show="!currentUser.friends.length"><span class="fa fa-info-circle fa-fw"></span> No friends!</p>
                         <table class="table table-hover table-striped">
-                            <tr ng-repeat="afriend in theFriends">
-                                <td ng-show="!afriend.friend.friendUser['google']"><span class="glyphicon glyphicon-user"></span> {{afriend.friend.friendUser['local'].email}}
+                            <tr ng-repeat="friend in currentUser.friends">
+                                <td><span class="fa fa-user fa-fw"></span> {{friend.FriendUser.Email}}</td>
+                                <td>
+                                    <button class="btn btn-success btn-xs" ng-click="shareBulletin(friend)"><i class="fa fa-share-alt fa-fw"></i></button>
+                                    <button class="btn btn-danger btn-xs" ng-click="unfriend(friend)"><i class="fa fa-trash fa-fw"></i></button>
                                 </td>
-                                <td ng-show="afriend.friend.friendUser['google']"><span class="glyphicon glyphicon-user"></span> {{afriend.friend.friendUser['google'].name}}
-                                </td>
-                                <td><button class="btn btn-danger btn-xs" ng-click="openUnfriend(afriend.friend.friendUser)"><i class="fa fa-trash fa-fw"></i></button></td>
-                                <td><button class="btn btn-success btn-xs" ng-click="openShareBulletin(afriend.friend)"><i class="fa fa-share-alt fa-fw"></i></button></td>
                             </tr>
                         </table>
                     </div>
                     <div class="col-lg-4 col-md-4">
                         <h4 style="padding-top:15px;"> Friend requests </h4>
-                        <p ng-show="!incomingFriendRequests.length"><span class="glyphicon glyphicon-info-sign"></span> No requests! </p>
+                        <p ng-show="!currentUser.friendRequestsReceived.length"><span class="fa fa-info-circle fa-fw"></span> No requests! </p>
                         <table class="table table-hover table-striped">
-                            <tr ng-repeat="pfr in incomingFriendRequests">
-                                <td><span class="glyphicon glyphicon-user"></span> {{pfr.FriendUser.Email}}</td>
-                                <td></td>
+                            <tr ng-repeat="frr in currentUser.friendRequestsReceived">
+                                <td><span class="fa fa-user fa-fw"></span> {{frr.FriendUser.Email}}</td>
                                 <td>
-                                    <button class="btn btn-info btn-xs" ng-click="acceptFriend(pfr)"><i class="fa fa-check fa-fw"> </i></button>
-                                    <button class="btn btn-danger btn-xs" ng-click="cancelFriendRequest(pfr)" style="margin-left:5px;"><i class="fa fa-times fa-fw"> </i></button></button>
+                                    <button class="btn btn-info btn-xs" ng-click="accept(frr)"><i class="fa fa-check fa-fw"> </i></button>
+                                    <button class="btn btn-danger btn-xs" ng-click="cancel(frr)" style="margin-left:5px;"><i class="fa fa-times fa-fw"> </i></button></button>
                                 </td>
                             </tr>
                         </table>
                     </div>
                     <div class="col-lg-4 col-md-4">
                         <h4 style="padding-top:15px;"> Friend request sent </h4>
-                        <p ng-show="!pendingFriendRequests.length"><span class="glyphicon glyphicon-info-sign"></span> No requests! </p>
+                        <p ng-show="!currentUser.friendRequestsSent.length"><span class="fa fa-info-circle fa-fw"></span> No requests! </p>
                         <table class="table table-hover table-striped">
-                            <tr ng-repeat="pfr in pendingFriendRequests">
-                                <td><span class="glyphicon glyphicon-user"></span> {{pfr.FriendUser.Email}}</td>
-                                <td></td>
-                                <td><button class="btn btn-danger btn-xs" ng-click="cancelFriendRequest(pfr)"><i class="fa fa-times fa-fw"> </i></button></td>
+                            <tr ng-repeat="frs in currentUser.friendRequestsSent">
+                                <td><span class="fa fa-user fa-fw"></span> {{frs.FriendUser.Email}}</td>
+                                <td><button class="btn btn-danger btn-xs" ng-click="cancel(frs)"><i class="fa fa-times fa-fw"> </i></button></td>
                             </tr>
                         </table>
                     </div>

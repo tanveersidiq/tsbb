@@ -1,7 +1,7 @@
 'use strict';
 app.controller('indexController',
     function ($scope, $rootScope, $location, $window, accountService) {
-        $rootScope.joinedBulletins = [];
+        $rootScope.bulletins = [];
         $scope.logOut = function () {
             accountService.logOut();
         }

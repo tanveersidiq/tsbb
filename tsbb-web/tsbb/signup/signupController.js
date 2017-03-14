@@ -15,8 +15,7 @@ app.controller('signupController', [
 			if ($scope.frmSignup.$valid) {
 				accountService.register($scope.user)
 					.then(function () {
-						$location.path('/home');
-						notificationService.displaySuccess('Welcome ' + $scope.user.email);
+						$location.path('/');
 					})
 					.catch(function (err) {
 						notificationService.displayError(err);
