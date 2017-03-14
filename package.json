@@ -5,7 +5,6 @@
   "main": "server.js",
   "scripts": {
     "start": "node server",
-    "zip": "zip --exclude=node_modules/* -r startup-kit-nodejs.zip *",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
