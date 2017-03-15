@@ -18,7 +18,9 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 
+app.use('/libs', express.static(__dirname + '/libs'));
 app.use(express.static(__dirname + '/tsbb-web'));
+app.use('/admin' , express.static(__dirname + '/tsbb-admin'));
 
 routes(app, express, '/tsbb-api');
 

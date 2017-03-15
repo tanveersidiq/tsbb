@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html data-ng-app="tsBB">
+<html data-ng-app="tsBBAdmin">
 
 <head>
     <meta charset="utf-8">
-    <title>Tanveer Sidiq Board Bulletin</title>
+    <title>Tanveer Sidiq Board Bulletin Admin Application</title>
     <!-- Jquery -->
     <script src="../libs/jquery/dist/jquery.js"></script>
     <!-- Bootstrap Core CSS -->
@@ -32,18 +32,10 @@
     <script src="services/authInterceptorService.js"></script>
     <script src="services/accountService.js"></script>
     <script src="services/notificationService.js"></script>
-    <script src="services/bulletinService.js"></script>
-    <script src="services/stickyService.js"></script>
-    <script src="services/friendService.js"></script>
-    <script src="services/shareService.js"></script>
-    <!-- Load directives -->
-    <script src="directives/dragDirective.js"></script>
     <!-- Load controllers -->
-    <script src="tsbb/signup/signupController.js"></script>
-    <script src="tsbb/login/loginController.js"></script>
-    <script src="tsbb/home/homeController.js"></script>
-    <script src="tsbb/home/indexController.js"></script>
-    <script src="tsbb/profile/profileController.js"></script>
+    <script src="tsbbAdmin/login/loginController.js"></script>
+    <script src="tsbbAdmin/home/homeController.js"></script>
+    <script src="tsbbAdmin/home/indexController.js"></script>
     <!-- Load custom filters -->
 </head>
 
@@ -51,7 +43,7 @@
     <div id="wrapper" data-ng-controller="indexController">
         <nav class="navbar navbar-inverse navbar-static-top" role="navigation" style="margin-bottom: 0">
             <div class="navbar-header">
-                <a class="navbar-brand" href="/">TS Bulletin Board</a>
+                <a class="navbar-brand" href="/">TS Bulletin Board Admin Application</a>
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
@@ -63,24 +55,7 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav in" id="side-menu">
                         <li>
-                            <a href="/home"><i class="fa fa-list-alt fa-fw"></i> Bulletin Boards</a>
-                            <ul class="nav nav-second-level collapse in" aria-expanded="true">
-
-                                <li data-ng-show="!$root.bulletins.length"> <a href="#">No bulletins yet!</a> </li>
-                                <li data-ng-class="{activeBulletin:bulletin.isActive}" ng-repeat="bulletin in $root.bulletins">
-                                    <a style="cursor:pointer;" data-ng-click="$root.active(bulletin)" data-ng-class="{bulletinTitle:bulletin.isActive}">
-                                        <i data-ng-show="bulletin.isShared" class="fa fa-users fa-fw"></i>
-                                        <i data-ng-show="!bulletin.isShared" class="fa fa-user fa-fw"></i> {{bulletin.Title}}
-                                    </a>
-                                </li>
-
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="/profile"><i class="fa fa-user fa-fw"></i> Profile</a>
-                        </li>
-                        <li>
-                            <a href="/settings"><i class="fa fa-cog fa-fw"></i> Settings</a>
+                            <a href="/home"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <li>
                             <a href="" data-ng-click="logOut()"><i class="fa fa-sign-out fa-fw"></i> Logout {{authentication.email}}</a>

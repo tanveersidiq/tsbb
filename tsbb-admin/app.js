@@ -1,20 +1,20 @@
-var app = angular.module('tsBB', [
+var app = angular.module('tsBBAdmin', [
     'ngRoute',
     'LocalStorageModule',
     'toastr',
     'angular-loading-bar',
     'ui.bootstrap',
-    'drag',
-    'tsBBRoutes'
+    'tsBBAdminRoutes'
 ]);
 
-app.constant('tsBBSettings', (function () {
-    var hostURL = window.location.protocol + '//' + window.location.host;
-    return {
-        webUIBaseUri: hostURL,
-        apiBaseUri: hostURL + '/tsbb-api/'
-    }
-})());
+app
+    .constant('tsBBAdminSettings', (function () {
+        var hostURL = window.location.protocol + '//' + window.location.host;
+        return {
+            webUIBaseUri: hostURL,
+            apiBaseUri: hostURL
+        }
+    })());
 
 app.config([
     '$qProvider',

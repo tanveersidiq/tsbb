@@ -1,4 +1,4 @@
 {
-    "directory": "tsbb-web/libs",
+    "directory": "libs",
     "allow_root": true
 }

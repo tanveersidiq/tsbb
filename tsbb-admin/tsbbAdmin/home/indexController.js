@@ -1,7 +1,7 @@
 'use strict';
 app.controller('indexController',
-    function ($scope, $rootScope, accountService) {
-        $rootScope.bulletins = [];
+    function ($scope,  accountService) {
+
         $scope.logOut = function () {
             accountService.logOut();
         }

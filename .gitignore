@@ -37,7 +37,7 @@ jspm_packages
 .node_repl_history
 
 # Bower Dependency
-tsbb-web/libs
+libs
 
 # Backup Code
-.backupStable
+.temp

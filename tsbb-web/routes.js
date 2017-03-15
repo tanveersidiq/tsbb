@@ -1,12 +1,9 @@
 angular
     .module('tsBBRoutes', [])
     .config([
-        '$sceDelegateProvider',
         '$routeProvider',
         '$locationProvider',
-        '$httpProvider',
-        'cfpLoadingBarProvider',
-        function ($sceDelegateProvider, $routeProvider, $locationProvider, $httpProvider, cfpLoadingBarProvider) {
+        function ($routeProvider, $locationProvider) {
 
             var authResolver = function (accountService) {
                 return accountService.authorize(accountService);
