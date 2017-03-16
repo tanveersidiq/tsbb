@@ -44,4 +44,5 @@ libs
 
 # SERVERLESS STUFF
 tsbb-admin-backend/.serverless
+tsbb-admin-backend/node_modules
 event.json
