@@ -11,7 +11,8 @@
             "env": {
                 "PORT": "3030",
                 "DATABASE_URL": "mysql://root:root@localhost/tsbb",
-                "JWT_SECRET": "imlovingit"
+                "JWT_SECRET": "imlovingit",
+                "ADMIN_GATEWAY_URL": "https://2yim9oaxkj.execute-api.us-east-1.amazonaws.com/dev"
             }
         },
         {

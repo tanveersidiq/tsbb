@@ -4,6 +4,7 @@ var models = require('./models.js'),
 module.exports = function (app, express, routeStart) {
 
     app.use(routeStart, require('./routes/account')(express, models));
+    app.use(routeStart, require('./routes/metric')(express, models));
     app.use(routeStart, authorize, require('./routes/bulletin')(express, models));
     app.use(routeStart, authorize, require('./routes/sticky')(express, models));
     app.use(routeStart, authorize, require('./routes/friend')(express, models));

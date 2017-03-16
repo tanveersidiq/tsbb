@@ -41,3 +41,7 @@ libs
 
 # Backup Code
 .temp
+
+# SERVERLESS STUFF
+tsbb-admin-backend/.serverless
+event.json

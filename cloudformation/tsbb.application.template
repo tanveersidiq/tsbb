@@ -126,6 +126,14 @@
             "MinLength": 1,
             "MaxLength": 255
         },
+        "TSBBAdminApplicationGatewayURL": {
+            "Default": "tsbb",
+            "Description": "TSBB admin gateway URL.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$"
+        },
         "TSBBRDSDatabaseURL": {
             "Type": "String",
             "Description": "TSBB Database FQDN URL"
@@ -189,7 +197,8 @@
                         "TSBBMaximumScalingSize",
                         "TSBBApplicationName",
                         "TSBBApplicationSourceS3Bucket",
-                        "TSBBPackagedZippedApplicationS3Bucket"
+                        "TSBBPackagedZippedApplicationS3Bucket",
+                        "TSBBAdminApplicationGatewayURL"
                     ]
                 },
                 {
@@ -240,6 +249,9 @@
                 },
                 "TSBBPackagedZippedApplicationS3Bucket": {
                     "default": "Packaged Zipped Application in S3 Bucket"
+                },
+                "TSBBAdminApplicationGatewayURL": {
+                    "default": "Admin Application Gateway URL"
                 },
                 "TSBBRDSDatabaseURL": {
                     "default": "Application Database URL"
@@ -479,6 +491,13 @@
                         "Value": {
                             "Ref": "TSBBRDSDatabaseURL"
                         }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "ADMIN_GATEWAY_URL",
+                        "Value": {
+                            "Ref": "TSBBAdminApplicationGatewayURL"
+                        }
                     }
                 ]
             }
@@ -559,9 +578,8 @@
             "Properties": {
                 "Path": "/",
                 "Roles": [{
-                        "Ref": "TSBBApplicationRole"
-                    }
-                ]
+                    "Ref": "TSBBApplicationRole"
+                }]
             }
         }
     },

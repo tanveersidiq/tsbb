@@ -12,7 +12,7 @@ app
         var hostURL = window.location.protocol + '//' + window.location.host;
         return {
             webUIBaseUri: hostURL,
-            apiBaseUri: hostURL
+            apiBaseUri: hostURL + '/tsbb-api/'
         }
     })());
 

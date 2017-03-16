@@ -20,7 +20,7 @@ app.factory('accountService',
             var deferred = $q.defer();
 
             _authentication.token = 'response.data.token';
-            _authentication.email = 'tanveer.sidiq@gmail.com';
+            _authentication.email = 'admin@crossover.com';
             _authentication.authenticated = true;
 
             localStorageService.set('userData', _authentication);
